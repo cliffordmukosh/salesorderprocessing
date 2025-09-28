@@ -1,0 +1,255 @@
+/* =========================
+   Base Styles
+========================= */
+body {
+    font-size: 0.9rem;
+    background: #f8f9fa;
+    margin-top: 60px; /* header height */
+}
+
+header, footer {
+    background: #343a40;
+    color: #fff;
+    padding: 8px 15px;
+    z-index: 1000;
+}
+
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 -2px 4px rgba(0,0,0,0.2);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* =========================
+   Page Container
+========================= */
+.page-container {
+    display: flex;
+    flex-direction: row;
+    min-height: calc(100vh - 120px); /* header + footer */
+    gap: 0;
+}
+
+/* =========================
+   Sidebar (Fixed Height)
+========================= */
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: #f8f9fa;
+    border-left: 1px solid #ddd;
+    box-shadow: -1px 0 6px rgba(0,0,0,0.08);
+    transition: width 0.3s ease;
+    position: sticky;
+    top: 60px; /* below header */
+    height: calc(100vh - 120px);
+    overflow-y: hidden; /* prevent sidebar scrolling */
+    z-index: 1000;
+}
+
+/* Sidebar collapsed */
+.sidebar.collapsed {
+    width: 0;
+    overflow: hidden;
+}
+
+/* Sidebar buttons container */
+.sidebar .d-flex {
+    flex-direction: column;
+    height: 100%;
+    gap: 0.5rem;
+}
+
+/* =========================
+   Sidebar Toggle Button
+========================= */
+.toggle-btn {
+    position: fixed;
+    top: 70px;
+    right: 250px;
+    background: #343a40;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px 0 0 4px;
+   z-index: 1040;
+    transition: right 0.3s ease;
+}
+
+.sidebar.collapsed + .toggle-btn {
+    right: 0;
+}
+
+/* =========================
+   Main Content
+========================= */
+.main-content {
+    flex-grow: 1;
+    padding: 0 15px;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* allow flex children to scroll */
+}
+
+/* =========================
+   Customer Info Row
+========================= */
+.customer-info-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.customer-card, .remarks-container {
+    flex: 1 1 300px;
+}
+
+.customer-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 10px; /* sticky customer info */
+    z-index: 10;
+}
+
+.customer-card .card-header {
+    background: #0d6efd;
+    color: #fff;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+}
+
+.customer-card .card-body {
+    padding: 12px;
+    font-size: 0.85rem;
+}
+
+/* Make remarks sticky if needed */
+.remarks-container {
+    position: sticky;
+    top: 150px; /* adjust based on header + customer card */
+    z-index: 5;
+}
+
+/* =========================
+   Items Table Container
+========================= */
+.card.flex-grow-1 {
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* critical for scroll */
+}
+
+.table-container {
+    flex: 1;          /* fill remaining space */
+    min-height: 0;    /* allow flex child to scroll */
+    overflow-y: auto; /* vertical scroll */
+    position: relative;
+    max-height: 240px; /* adjust to show scroll after 3-4 items */
+}
+
+/* Table Styling */
+#itemsTableMain {
+    width: 100%;
+    font-size: 12.5px;
+    border-collapse: collapse;
+}
+
+#itemsTableMain th, #itemsTableMain td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 4px 6px;
+    border: 1px solid #ddd;
+}
+
+/* Sticky table headers */
+#itemsTableMain thead th {
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+    z-index: 10;
+}
+
+/* =========================
+   Totals Row
+========================= */
+.totals-row {
+    position: sticky;
+    bottom: 0;
+    z-index: 950;
+    background: #f8f9fa;
+    border-top: 1px solid #ddd;
+    padding: 8px 0;
+    font-size: 13px;
+}
+
+.date-totals-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+}
+
+.summary-box {
+    flex: 1 1 150px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    text-align: center;
+}
+
+.summary-title { font-size: 0.85rem; font-weight: 600; }
+.summary-value { font-size: 1.1rem; font-weight: bold; }
+
+/* =========================
+   Transaction Panel
+========================= */
+.transaction-panel {
+    display: none;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: #fff;
+    padding: 12px;
+    margin-top: 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.transaction-panel h6 {
+    background: #f8f9fa;
+    padding: 6px;
+    font-size: 0.9rem;
+    margin: -12px -12px 10px -12px;
+    border-bottom: 1px solid #ddd;
+}
+
+/* =========================
+   Forms and Inputs
+========================= */
+textarea.form-control {
+    resize: none;
+}
+
+/* =========================
+   Utility
+========================= */
+.btn-sm { font-size: 0.8rem; min-width: 120px; }
+
+
