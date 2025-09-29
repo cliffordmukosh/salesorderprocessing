@@ -62,31 +62,33 @@ require __DIR__ . '/db.php';
 </div>
 
 
-        <!-- Transaction Panel -->
-        <div id="transactionPanel" 
-             style="position:fixed; bottom:70px; left:20px; width:280px; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); padding:14px; z-index:1100; display:none; font-family:Arial, sans-serif;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <h6 style="margin:0; font-size:16px; font-weight:600; color:#333;">Perform a transaction</h6>
-                <button type="button" id="closeTransactionPanel" 
-                        style="background:none; border:none; font-size:20px; font-weight:bold; color:#666; cursor:pointer; line-height:1;">&times;</button>
-            </div>
-            <ol style="margin:0; padding-left:20px; font-size:15px; line-height:1.7; color:#444;">
-                <li><a href="#" data-transaction="Quote" style="text-decoration:none; color:#0d6efd; font-weight:500;">Quote Transaction</a></li>
-                <li><a href="#" data-transaction="Invoice" style="text-decoration:none; color:#0d6efd; font-weight:500;">Invoice Transaction</a></li>
-                <li><a href="#" data-transaction="Return" style="text-decoration:none; color:#0d6efd; font-weight:500;">Return Transaction</a></li>
-                <li><a href="#" data-transaction="Receive Payment" style="text-decoration:none; color:#0d6efd; font-weight:500;">Receive Payment</a></li>
-                <li><a href="#" data-transaction="Recall" style="text-decoration:none; color:#0d6efd; font-weight:500;">Recall</a></li>
-                <li><a href="#" data-transaction="Delivery" style="text-decoration:none; color:#0d6efd; font-weight:500;">Delivery</a></li>
-            </ol>
-        </div>
+      <!-- Transaction Panel --> 
+<div id="transactionPanel">
+    <div class="panel-header">
+        <h6>Perform a Transaction</h6>
+        <button type="button" id="closeTransactionPanel">&times;</button>
+    </div>
+    <ol class="transaction-list">
+        <li><a href="#" data-transaction="Quote">Quote Transaction</a></li>
+        <li><a href="#" data-transaction="Invoice">Invoice Transaction</a></li>
+        <li><a href="#" data-transaction="Return">Return Transaction</a></li>
+        <li><a href="#" data-transaction="Receive Payment">Receive Payment</a></li>
+        <li><a href="#" data-transaction="Recall">Recall</a></li>
+        <li><a href="#" data-transaction="Delivery">Delivery</a></li>
+    </ol>
+</div>
 
-        <!-- Confirmation box -->
-        <div id="transactionConfirmation" 
-             style="position:fixed; bottom:140px; left:20px; background:#198754; color:#fff; padding:10px 14px; border-radius:6px; font-size:14px; font-weight:500; display:none; z-index:1200; box-shadow:0 4px 10px rgba(0,0,0,0.2);">
-            <span id="confirmationMessage">Transaction started</span>
-            <button type="button" id="closeConfirmation" 
-                    style="background:none; border:none; color:#fff; font-size:16px; margin-left:10px; cursor:pointer;">&times;</button>
-        </div>
+<!-- Confirmation box -->
+<div id="transactionConfirmation" 
+     style="position:fixed; bottom:70px; left:50%; transform:translateX(-50%); 
+            background:#198754; color:#fff; padding:10px 14px; border-radius:6px; 
+            font-size:14px; font-weight:500; display:none; z-index:1200; 
+            box-shadow:0 4px 10px rgba(0,0,0,0.2); text-align:center; min-width:200px;">
+    <span id="confirmationMessage">Transaction started</span>
+    <button type="button" id="closeConfirmation" 
+            style="background:none; border:none; color:#fff; font-size:16px; margin-left:10px; cursor:pointer;">&times;</button>
+</div>
+
 
         <!-- Top Row: Date + Totals -->
         <div class="totals-row my-3">
