@@ -528,6 +528,7 @@ function initializeEventListeners() {
       .addEventListener("click", function () {
         if (currentRow) {
           currentRow.remove();
+
           // Reindex rows
           document
             .querySelectorAll("#itemsTableMain tbody tr")
@@ -541,6 +542,13 @@ function initializeEventListeners() {
 
           updateTotals();
           saveState();
+
+          // If no items remain, reset like Void button
+          if (itemCounter === 0) {
+            localStorage.removeItem("cart");
+            itemCounter = 0;
+            location.reload(); // refresh window
+          }
 
           let modal = bootstrap.Modal.getInstance(
             document.getElementById("removeConfirmModal")
