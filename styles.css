@@ -217,7 +217,7 @@ footer {
 }
 
 .summary-title { font-size: 0.85rem; font-weight: 600; }
-.summary-value { font-size: 1.1rem; font-weight: bold; }
+.summary-value { font-size: 25px; font-weight: bold; }
 
 /* =========================
    Transaction Panel

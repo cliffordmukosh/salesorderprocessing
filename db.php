@@ -3,7 +3,7 @@
 
 $host     = "localhost";
 $port     = 3306;
-$dbname   = "db001";   // change this to your database name
+$dbname   = "db001";   
 $username = "root";
 $password = "123456";
 

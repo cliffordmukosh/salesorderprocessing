@@ -1,8 +1,10 @@
 <?php
-require __DIR__ . '/db.php';
+require __DIR__ . '/../db.php';
 
 // List of tables
 $tables = [
+    'cashier',
+    'store',
     "accountreceivable",
     "accountreceivablehistory",
     "banks",

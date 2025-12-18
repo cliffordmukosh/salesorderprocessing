@@ -1,6 +1,19 @@
 let itemCounter = 0; // Initialize globally
 let currentRow = null; // Track the row being edited in the discount modal
 
+
+// ──────────────────────────────────────────────────────────────
+function formatKES(number) {
+  if (isNaN(number) || number === null || number === undefined)
+    return "KES 0.00";
+  return (
+    "KES " +
+    parseFloat(number).toLocaleString("en-KE", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  );
+}
 // Save state to localStorage
 function saveState() {
   try {
@@ -96,30 +109,29 @@ function loadState() {
   }
 }
 
-// Update totals
+// Update totals with proper KES formatting
 function updateTotals() {
-  try {
     let subTotal = 0;
     let taxTotal = 0;
     let grandTotal = 0;
 
     document.querySelectorAll("#itemsTableMain tbody tr").forEach((row) => {
-      let totalExcl =
-        parseFloat(row.querySelector(".total-excl").textContent) || 0;
-      let totalIncl =
-        parseFloat(row.querySelector(".total-incl").textContent) || 0;
-      let tax = totalIncl - totalExcl;
-      subTotal += totalExcl;
-      taxTotal += tax;
-      grandTotal += totalIncl;
+        // Skip completely empty rows
+        if (!row.cells[1].textContent.trim() && !row.cells[2].textContent.trim()) return;
+
+        let totalExcl = parseFloat(row.querySelector(".total-excl").textContent.replace(/[^\d.-]/g, '')) || 0;
+        let totalIncl = parseFloat(row.querySelector(".total-incl").textContent.replace(/[^\d.-]/g, '')) || 0;
+        let tax = totalIncl - totalExcl;
+
+        subTotal += totalExcl;
+        taxTotal += tax;
+        grandTotal += totalIncl;
     });
 
-    document.getElementById("subTotal").textContent = subTotal.toFixed(2);
-    document.getElementById("taxTotal").textContent = taxTotal.toFixed(2);
-    document.getElementById("grandTotal").textContent = grandTotal.toFixed(2);
-  } catch (e) {
-    console.error("Error updating totals:", e);
-  }
+    // Update with beautiful formatting
+    document.getElementById("subTotal").textContent = formatKES(subTotal);
+    document.getElementById("taxTotal").textContent = formatKES(taxTotal);
+    document.getElementById("grandTotal").textContent = formatKES(grandTotal);
 }
 
 // Initialize event listeners
@@ -632,3 +644,5 @@ document
     );
     customerModal.show();
   });
+
+  
