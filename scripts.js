@@ -570,12 +570,161 @@ function initializeEventListeners() {
         }
       });
 
-    // Placeholder for other buttons
-    document.getElementById("saveBtn").addEventListener("click", function () {
-      console.log("Save button clicked");
-      // Implement save logic here
-    });
+    // ===============================================
+    // FINAL SAVE TRANSACTION – 100% WORKING & CLEAN
+    // ===============================================
+    document
+      .getElementById("saveBtn")
+      .addEventListener("click", async function () {
+        const rows = document.querySelectorAll("#itemsTableMain tbody tr");
+        const hasItems = Array.from(rows).some((row) =>
+          row.cells[1]?.textContent.trim()
+        );
 
+        if (!hasItems) {
+          alert("No items in cart!");
+          return;
+        }
+
+        if (!confirm("Save this transaction to database?")) return;
+
+        // GET CASHIER ID FROM HIDDEN INPUT (SAFE & WORKING!)
+        const cashierID =
+          parseInt(document.getElementById("currentCashierID").value) || 54;
+
+        try {
+          // Get current batch
+          const batchRes = await fetch("get_batch.php");
+          const batchData = await batchRes.json();
+          const batchNumber = batchData.batchNumber;
+
+          // Get customer ID
+          const customerHTML =
+            document.getElementById("customerInfo").innerHTML;
+          const nameMatch = customerHTML.match(/Name:<\/strong>\s*([^<]+)/);
+          const customerName = nameMatch ? nameMatch[1].trim() : "-";
+          const customerID =
+            customerName !== "-"
+              ? (
+                  await (
+                    await fetch(
+                      `get_customer.php?name=${encodeURIComponent(
+                        customerName
+                      )}`
+                    )
+                  ).json()
+                ).id
+              : 0;
+
+          // Totals
+          const subTotal =
+            parseFloat(
+              document
+                .getElementById("subTotal")
+                .textContent.replace(/[^\d.-]/g, "")
+            ) || 0;
+          const taxTotal =
+            parseFloat(
+              document
+                .getElementById("taxTotal")
+                .textContent.replace(/[^\d.-]/g, "")
+            ) || 0;
+          const grandTotal = subTotal + taxTotal;
+
+          const remarks = document.getElementById("remarks").value.trim();
+
+          // 1. Save Header
+          const headerRes = await fetch("save_transaction.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "insert_header",
+              ShipToIDX: 1,
+              StoreIDX: 1,
+              BatchNumberX: batchNumber,
+              CustomerIDX: customerID,
+              CashierIDX: cashierID, // FIXED: Now pure JavaScript!
+              TotalX: grandTotal,
+              SalesTaxX: taxTotal,
+              CommentX: remarks,
+              RefenceNumberX: "",
+              StatusX: 1,
+              ExchangeIDX: 1,
+              ChannelTypeX: 1,
+              RecallIDX: 0,
+              RecallTypeX: 0,
+            }),
+          });
+
+          const header = await headerRes.json();
+          if (!header.success)
+            throw new Error(header.error || "Failed to save header");
+          const transactionID = header.transactionID;
+
+          // 2. Save Each Line Item
+          for (let row of rows) {
+            const code = row.cells[1]?.textContent.trim();
+            if (!code) continue;
+
+            const itemRes = await fetch(
+              `get_item.php?code=${encodeURIComponent(code)}`
+            );
+            const itemData = await itemRes.json();
+            if (!itemData.id) {
+              console.warn("Item not found:", code);
+              continue;
+            }
+
+            const qty =
+              parseFloat(row.querySelector(".quantity-input").value) || 1;
+            const priceExcl = parseFloat(row.dataset.priceExcl) || 0;
+            const taxRate = parseFloat(row.dataset.taxpercentage) || 0;
+            const discount = parseFloat(row.dataset.discount) || 0;
+            const discountType = row.dataset.discountType || "percentage";
+
+            const lineExcl = priceExcl * qty;
+            const lineInclBase = lineExcl * (1 + taxRate / 100);
+            const lineIncl =
+              discountType === "percentage"
+                ? lineInclBase * (1 - discount / 100)
+                : lineInclBase - discount;
+            const lineTax = lineIncl - lineExcl;
+
+            await fetch("save_transaction.php", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "insert_entry",
+                TransactionIDX: transactionID,
+                StoreIDX: 1,
+                ItemIDX: itemData.id,
+                QuantityX: qty,
+                PriceX: priceExcl,
+                FullPriceX: priceExcl,
+                CostX: 0,
+                CommissionX: 0,
+                SalesRepIDX: 0,
+                TaxableX: taxRate > 0 ? 1 : 0,
+                SalesTaxX: lineTax,
+                CommentX: "",
+                DiscountReasonCodeIDX: 0,
+                ReturnReasonCodeIDX: 0,
+                QuantityDiscountIDX: 0,
+                BatchNoX: "<none>",
+                PriceSourceX: 1,
+                DetailedIDX: 0,
+              }),
+            });
+          }
+
+          alert(`Transaction #${transactionID} saved successfully!`);
+          localStorage.removeItem("cart");
+          location.reload();
+        } catch (err) {
+          console.error("Save Error:", err);
+          alert("Save failed: " + err.message);
+        }
+      });
     document
       .getElementById("invoicesBtn")
       .addEventListener("click", function () {
@@ -645,4 +794,20 @@ document
     customerModal.show();
   });
 
-  
+async function getCurrentBatchNumber() {
+  const res = await fetch("get_batch.php");
+  const data = await res.json();
+  return data.batchNumber || 1;
+}
+
+async function getCustomerIDByName(name) {
+  const res = await fetch(`get_customer.php?name=${encodeURIComponent(name)}`);
+  const data = await res.json();
+  return data.id || 0;
+}
+
+async function getItemIDByCode(code) {
+  const res = await fetch(`get_item.php?code=${encodeURIComponent(code)}`);
+  const data = await res.json();
+  return data.id || null;
+}

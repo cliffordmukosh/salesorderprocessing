@@ -1,5 +1,6 @@
 <?php
 // get_item.php
+
 header('Content-Type: application/json');
 require "db.php";
 
@@ -20,4 +21,5 @@ if ($stmt->fetch()) {
     echo json_encode(['id' => null]);
 }
 $stmt->close();
+
 ?>

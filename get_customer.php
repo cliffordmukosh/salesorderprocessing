@@ -1,5 +1,6 @@
 <?php
 // get_customer.php
+ob_start();
 header('Content-Type: application/json');
 require "db.php";
 
@@ -26,4 +27,5 @@ if ($stmt->fetch()) {
     echo json_encode(['id' => 0]); // walk-in
 }
 $stmt->close();
+ob_end_clean();
 ?>

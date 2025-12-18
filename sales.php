@@ -5,7 +5,8 @@ require "db.php";
 if (!isset($_SESSION['cashier_id'])) {
     header("Location: login.php");
     exit;
-}?>
+}
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -16,10 +17,12 @@ if (!isset($_SESSION['cashier_id'])) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="styles.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
-
 </head>
 <body>
 <?php include 'header.php'; ?>
+
+<!-- CRITICAL: Cashier ID for JavaScript (NO PHP IN .js FILES!) -->
+<input type="hidden" id="currentCashierID" value="<?= $_SESSION['cashier_id'] ?? 54 ?>">
 
 <div class="page-container">
     <!-- Main Content -->
@@ -31,8 +34,8 @@ if (!isset($_SESSION['cashier_id'])) {
                 <div class="card-body" id="customerInfo">
                     <p class="mb-1"><strong>Name:</strong> -</p>
                     <p class="mb-1"><strong>Location:</strong> -</p>
-                    <p class="mb-1"><strong>Credit Limit:</strong> 0.00</p>
-                    <p class="mb-0"><strong>Account Balance:</strong> 0.00</p>
+                    <p class="mb-1"><strong>Credit Limit:</strong> KES 0.00</p>
+                    <p class="mb-0"><strong>Account Balance:</strong> KES 0.00</p>
                 </div>
             </div>
             <div class="remarks-container mt-3">
@@ -41,122 +44,119 @@ if (!isset($_SESSION['cashier_id'])) {
             </div>
         </div>
 
-   <!-- Items Table -->
-<div class="card mb-0 flex-grow-1">
-    <div class="card-header py-2"><strong>Items</strong></div>
-    <div class="table-container">
-        <table class="table table-bordered table-sm" id="itemsTableMain">
-            <thead class="table-light">
-                <tr>
-                    <th>#</th>
-                    <th>Code</th>
-                    <th>Description</th>
-                    <th>Original Price</th>
-                    <th>Quantity</th>
-                    <th>Disc %</th>
-                    <th>Price</th>
-                    <th>Total Excl</th>
-                    <th>Total Incl</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows dynamically inserted here -->
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
-      <!-- Transaction Panel --> 
-<div id="transactionPanel">
-    <div class="panel-header">
-        <h6>Perform a Transaction</h6>
-        <button type="button" id="closeTransactionPanel">&times;</button>
-    </div>
-    <ol class="transaction-list">
-        <li><a href="#" data-transaction="Quote">Quote Transaction</a></li>
-        <li><a href="#" data-transaction="Invoice">Invoice Transaction</a></li>
-        <li><a href="#" data-transaction="Return">Return Transaction</a></li>
-        <li><a href="#" data-transaction="Receive Payment">Receive Payment</a></li>
-        <li><a href="#" data-transaction="Recall">Recall</a></li>
-        <li><a href="#" data-transaction="Delivery">Delivery</a></li>
-    </ol>
-</div>
-
-<!-- Confirmation box -->
-<div id="transactionConfirmation" 
-     style="position:fixed; bottom:70px; left:50%; transform:translateX(-50%); 
-            background:#198754; color:#fff; padding:10px 14px; border-radius:6px; 
-            font-size:14px; font-weight:500; display:none; z-index:1200; 
-            box-shadow:0 4px 10px rgba(0,0,0,0.2); text-align:center; min-width:200px;">
-    <span id="confirmationMessage">Transaction started</span>
-    <button type="button" id="closeConfirmation" 
-            style="background:none; border:none; color:#fff; font-size:16px; margin-left:10px; cursor:pointer;">&times;</button>
-</div>
-
-
-<!-- Top Totals Section (now with formatted numbers) -->
-<div class="totals-row my-3">
-    <div class="date-totals-container">
-        <div class="date-container">
-            <label class="form-label mb-1">Transaction Date Time</label>
-            <input type="datetime-local" class="form-control form-control-sm" value="<?= date('Y-m-d\TH:i') ?>">
+        <!-- Items Table -->
+        <div class="card mb-0 flex-grow-1">
+            <div class="card-header py-2"><strong>Items</strong></div>
+            <div class="table-container">
+                <table class="table table-bordered table-sm" id="itemsTableMain">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Code</th>
+                            <th>Description</th>
+                            <th>Original Price</th>
+                            <th>Quantity</th>
+                            <th>Disc %</th>
+                            <th>Price</th>
+                            <th>Total Excl</th>
+                            <th>Total Incl</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Dynamic rows go here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="summary-box text-center">
-            <div class="summary-title">Sub Total</div>
-            <div class="summary-value fw-bold text-primary" id="subTotal">KES 0.00</div>
+
+        <!-- Transaction Panel -->
+        <div id="transactionPanel" style="display:none;">
+            <div class="panel-header">
+                <h6>Perform a Transaction</h6>
+                <button type="button" id="closeTransactionPanel">&times;</button>
+            </div>
+            <ol class="transaction-list">
+                <li><a href="#" data-transaction="Quote">Quote Transaction</a></li>
+                <li><a href="#" data-transaction="Invoice">Invoice Transaction</a></li>
+                <li><a href="#" data-transaction="Return">Return Transaction</a></li>
+                <li><a href="#" data-transaction="Receive Payment">Receive Payment</a></li>
+                <li><a href="#" data-transaction="Recall">Recall</a></li>
+                <li><a href="#" data-transaction="Delivery">Delivery</a></li>
+            </ol>
         </div>
-        <div class="summary-box text-center">
-            <div class="summary-title">Tax</div>
-            <div class="summary-value fw-bold text-warning" id="taxTotal">KES 0.00</div>
+
+        <!-- Confirmation box -->
+        <div id="transactionConfirmation" 
+             style="position:fixed; bottom:70px; left:50%; transform:translateX(-50%); 
+                    background:#198754; color:#fff; padding:10px 14px; border-radius:6px; 
+                    font-size:14px; font-weight:500; display:none; z-index:1200; 
+                    box-shadow:0 4px 10px rgba(0,0,0,0.2); text-align:center; min-width:200px;">
+            <span id="confirmationMessage">Transaction started</span>
+            <button type="button" id="closeConfirmation" 
+                    style="background:none; border:none; color:#fff; font-size:16px; margin-left:10px; cursor:pointer;">&times;</button>
         </div>
-        <div class="summary-box text-center">
-            <div class="summary-title fs-5">Total</div>
-            <div class="summary-value fw-bold fs-4 text-success" id="grandTotal">KES 0.00</div>
+
+        <!-- Totals Section -->
+        <div class="totals-row my-3">
+            <div class="date-totals-container">
+                <div class="date-container">
+                    <label class="form-label mb-1">Transaction Date Time</label>
+                    <input type="datetime-local" class="form-control form-control-sm" value="<?= date('Y-m-d\TH:i') ?>">
+                </div>
+                <div class="summary-box text-center">
+                    <div class="summary-title">Sub Total</div>
+                    <div class="summary-value fw-bold text-primary" id="subTotal">KES 0.00</div>
+                </div>
+                <div class="summary-box text-center">
+                    <div class="summary-title">Tax</div>
+                    <div class="summary-value fw-bold text-warning" id="taxTotal">KES 0.00</div>
+                </div>
+                <div class modal-bodytext-center">
+                    <div class="summary-title fs-5">Total</div>
+                    <div class="summary-value fw-bold fs-4 text-success" id="grandTotal">KES 0.00</div>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
     </div>
 
-<!-- Sidebar -->
-<div class="sidebar card p-3" id="sidebar">
-  <div class="d-flex flex-column gap-2">
-    <button class="btn btn-secondary btn-sm text-start" id="transactionBtn">
-      <i class="fas fa-exchange-alt me-2"></i> Transaction
-    </button>
-    <button class="btn btn-info btn-sm text-start" id="setCustomerBtn" data-bs-toggle="modal" data-bs-target="#customerModal">
-      <i class="fas fa-user me-2"></i> Set Customer
-    </button>
-    <button type="button" class="btn btn-primary btn-sm text-start" id="btnItemLookup" data-bs-toggle="modal" data-bs-target="#itemModal">
-      <i class="fas fa-search me-2"></i> Item Lookup
-    </button>
-    <button class="btn btn-outline-secondary btn-sm text-start" id="saveBtn">
-      <i class="fas fa-save me-2"></i> Save
-    </button>
-    <button class="btn btn-danger btn-sm text-start" id="voidBtn">
-      <i class="fas fa-ban me-2"></i> Void
-    </button>
-    <button class="btn btn-outline-primary btn-sm text-start" id="invoicesBtn">
-      <i class="fas fa-file-invoice me-2"></i> Invoices
-    </button>
-  </div>
+    <!-- Sidebar -->
+    <div class="sidebar card p-3" id="sidebar">
+        <div class="d-flex flex-column gap-2">
+            <button class="btn btn-secondary btn-sm text-start" id="transactionBtn">
+                <i class="fas fa-exchange-alt me-2"></i> Transaction
+            </button>
+            <button class="btn btn-info btn-sm text-start" id="setCustomerBtn" data-bs-toggle="modal" data-bs-target="#customerModal">
+                <i class="fas fa-user me-2"></i> Set Customer
+            </button>
+            <button type="button" class="btn btn-primary btn-sm text-start" id="btnItemLookup" data-bs-toggle="modal" data-bs-target="#itemModal">
+                <i class="fas fa-search me-2"></i> Item Lookup
+            </button>
+            <button class="btn btn-outline-secondary btn-sm text-start" id="saveBtn">
+                <i class="fas fa-save me-2"></i> Save
+            </button>
+            <button class="btn btn-danger btn-sm text-start" id="voidBtn">
+                <i class="fas fa-ban me-2"></i> Void
+            </button>
+            <button class="btn btn-outline-primary btn-sm text-start" id="invoicesBtn">
+                <i class="fas fa-file-invoice me-2"></i> Invoices
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar Toggle Button -->
+    <button class="toggle-btn" id="toggleSidebar">☰</button>
 </div>
 
-
-<!-- Sidebar Toggle Button -->
-<button class="toggle-btn" id="toggleSidebar">☰ </button>
-
-</div>
+<!-- ======================== ALL MODALS BELOW ======================== -->
 
 <!-- Discount Modal -->
-<div class="modal fade" id="discountModal" tabindex="-1" aria-labelledby="discountModalLabel" aria-hidden="true" 
-     data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="discountModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="discountModalLabel">Set Discount</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Set Discount</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div class="mb-3">
@@ -184,8 +184,7 @@ if (!isset($_SESSION['cashier_id'])) {
 </div>
 
 <!-- Customer Modal -->
-<div class="modal fade" id="customerModal" tabindex="-1" 
-     data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="customerModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -210,28 +209,27 @@ if (!isset($_SESSION['cashier_id'])) {
                                 </tr>
                             </thead>
                             <tbody>
-                            <?php
-                            $sql = "SELECT ID, AccountNumber, FirstName, LastName, Company, PhoneNumber, City, Country, CreditLimit 
-                                    FROM customer LIMIT 50";
-                            $result = $conn->query($sql);
-                            if ($result && $result->num_rows > 0) {
-                                while ($row = $result->fetch_assoc()) {
-                                    echo "<tr data-id='{$row['ID']}'
-                                              data-name='{$row['FirstName']} {$row['LastName']}'
-                                              data-company='{$row['Company']}'
-                                              data-phone='{$row['PhoneNumber']}'
-                                              data-credit='{$row['CreditLimit']}'
-                                              data-location='{$row['City']}, {$row['Country']}'>
-                                              <td>{$row['ID']}</td>
-                                              <td>{$row['AccountNumber']}</td>
-                                              <td>{$row['FirstName']}</td>
-                                              <td>{$row['LastName']}</td>
-                                              <td>{$row['Company']}</td>
-                                              <td>{$row['PhoneNumber']}</td>
-                                          </tr>";
+                                <?php
+                                $sql = "SELECT ID, AccountNumber, FirstName, LastName, Company, PhoneNumber, City, Country, CreditLimit FROM customer LIMIT 50";
+                                $result = $conn->query($sql);
+                                if ($result && $result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) {
+                                        echo "<tr data-id='{$row['ID']}'
+                                                  data-name='{$row['FirstName']} {$row['LastName']}'
+                                                  data-company='{$row['Company']}'
+                                                  data-phone='{$row['PhoneNumber']}'
+                                                  data-credit='{$row['CreditLimit']}'
+                                                  data-location='{$row['City']}, {$row['Country']}'>
+                                                  <td>{$row['ID']}</td>
+                                                  <td>{$row['AccountNumber']}</td>
+                                                  <td>{$row['FirstName']}</td>
+                                                  <td>{$row['LastName']}</td>
+                                                  <td>{$row['Company']}</td>
+                                                  <td>{$row['PhoneNumber']}</td>
+                                              </tr>";
+                                    }
                                 }
-                            }
-                            ?>
+                                ?>
                             </tbody>
                         </table>
                     </div>
@@ -244,10 +242,8 @@ if (!isset($_SESSION['cashier_id'])) {
     </div>
 </div>
 
-
 <!-- Properties Modal -->
-<div class="modal fade" id="propertiesModal" tabindex="-1" 
-     data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="propertiesModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -268,14 +264,13 @@ if (!isset($_SESSION['cashier_id'])) {
     </div>
 </div>
 
-
 <!-- Item Modal -->
-<div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+<div class="modal fade" id="itemModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="itemModalLabel">Select Item</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Select Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="text" id="searchItem" class="form-control mb-2" placeholder="Search items...">
@@ -290,33 +285,30 @@ if (!isset($_SESSION['cashier_id'])) {
                             </tr>
                         </thead>
                         <tbody>
-                        <?php
-                        $sql = "SELECT ItemLookupCode, Description, quantity, Price, TaxID FROM item WHERE Inactive = 0";
-                        $result = $conn->query($sql);
-                        if ($result && $result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                                $taxSql = "SELECT Percentage FROM tax WHERE ID = " . intval($row['TaxID']);
-                                $taxResult = $conn->query($taxSql);
-                                $taxPercentage = $taxResult && $taxResult->num_rows > 0 ? $taxResult->fetch_assoc()['Percentage'] : 0;
-                                $priceIncl = floatval($row['Price']);
-                                $taxRate = $taxPercentage / 100;
-                                $priceExcl = $priceIncl / (1 + $taxRate);
-                                $taxAmount = $priceIncl - $priceExcl;
-                                echo "<tr data-code='{$row['ItemLookupCode']}' 
-                                        data-description='{$row['Description']}' 
-                                        data-quantity='{$row['quantity']}' 
-                                        data-price-incl='{$priceIncl}' 
-                                        data-price-excl='" . number_format($priceExcl, 2, '.', '') . "' 
-                                        data-taxamount='" . number_format($taxAmount, 2, '.', '') . "' 
-                                        data-taxpercentage='{$taxPercentage}'>
-                                        <td>{$row['ItemLookupCode']}</td>
-                                        <td>{$row['Description']}</td>
-                                        <td>{$row['quantity']}</td>
-                                        <td>" . number_format($priceExcl, 2) . "</td>
-                                      </tr>";
+                            <?php
+                            $sql = "SELECT ItemLookupCode, Description, quantity, Price, TaxID FROM item WHERE Inactive = 0";
+                            $result = $conn->query($sql);
+                            if ($result && $result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) {
+                                    $taxSql = "SELECT Percentage FROM tax WHERE ID = " . intval($row['TaxID']);
+                                    $taxResult = $conn->query($taxSql);
+                                    $taxPercentage = $taxResult && $taxResult->num_rows > 0 ? $taxResult->fetch_assoc()['Percentage'] : 0;
+                                    $priceIncl = floatval($row['Price']);
+                                    $taxRate = $taxPercentage / 100;
+                                    $priceExcl = $priceIncl / (1 + $taxRate);
+                                    echo "<tr data-code='{$row['ItemLookupCode']}' 
+                                              data-description='{$row['Description']}' 
+                                              data-quantity='{$row['quantity']}' 
+                                              data-price-excl='" . number_format($priceExcl, 2, '.', '') . "'
+                                              data-taxpercentage='{$taxPercentage}'>
+                                              <td>{$row['ItemLookupCode']}</td>
+                                              <td>{$row['Description']}</td>
+                                              <td>{$row['quantity']}</td>
+                                              <td>" . number_format($priceExcl, 2) . "</td>
+                                          </tr>";
+                                }
                             }
-                        }
-                        ?>
+                            ?>
                         </tbody>
                     </table>
                 </div>
@@ -326,14 +318,12 @@ if (!isset($_SESSION['cashier_id'])) {
 </div>
 
 <!-- Remove Confirmation Modal -->
-<div class="modal fade" id="removeConfirmModal" tabindex="-1" 
-     aria-labelledby="removeConfirmModalLabel" aria-hidden="true"
-     data-bs-backdrop="static" data-bs-keyboard="false">
+<div class="modal fade" id="removeConfirmModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="removeConfirmModalLabel">Confirm Removal</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Confirm Removal</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="removeConfirmMessage">
                 Are you sure you want to remove this item?
@@ -345,7 +335,6 @@ if (!isset($_SESSION['cashier_id'])) {
         </div>
     </div>
 </div>
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="scripts.js"></script>

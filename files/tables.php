@@ -3,6 +3,14 @@ require __DIR__ . '/../db.php';
 
 // List of tables
 $tables = [
+
+    'orderentry',
+    'payment',
+    'orders',
+    'tax',
+    'category',
+     'item',
+     'itempicture',
     'cashier',
     'store',
     "accountreceivable",
